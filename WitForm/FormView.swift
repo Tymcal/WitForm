@@ -20,9 +20,12 @@ struct FormView: View {
     
     @State private var userDatas: UserData = UserData(stuid: "")
     @State private var savedData: [SavedResponse] = personalData
-    @State private var canbeAutofilledData: [String] = []
     
-    @State private var showAutofillView: Bool = false
+    private var matchedData: [String] {
+        checkAutofill()
+    }
+    
+    @State private var isPresenting: Bool = false
     
     var body: some View {
         NavigationStack {
@@ -86,24 +89,30 @@ struct FormView: View {
             .navigationTitle("Dynamic Form")
             .frame(width: .infinity, height: .infinity)
             .background(lightCream.opacity(0.25))
-            .fullScreenCover(isPresented: $showAutofillView) {
-                AutofillView(showAutofillView: $showAutofillView)
+            .fullScreenCover(isPresented: $isPresenting, onDismiss: onDismiss) {
+                AutofillView(questions: matchedData, isPresenting: $isPresenting)
+            }
+            .onAppear {
+                if matchedData != [] {
+                    isPresenting = true
+                }
             }
         }
     }
     
-    private func checkAutofill() {
+    private func checkAutofill() -> [String] {
+        var canbeAutofilledData: [String] = []
         for question in questions {
             if let ques = savedData.first(where: { $0.q == question.title }) {
                 canbeAutofilledData.append(ques.q)
             }
-            
         }
-        print(canbeAutofilledData)
-//        if let autofillData = autofillData {
-//            showAutofillView = true
-//        }
-        return showAutofillView = true
+//        print(canbeAutofilledData)
+        return canbeAutofilledData
+    }
+    
+    func onDismiss() {
+        
     }
     
     private func handleSubmit() {

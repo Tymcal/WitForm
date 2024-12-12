@@ -8,13 +8,14 @@
 import SwiftUI
 
 struct AutofillView: View {
-    @State private var savedData: [SavedResponse] = [
-        SavedResponse(q: "ชื่อ สกุล", a: "สมชาย ใจดี"),
-        SavedResponse(q: "มหาลัย", a: "สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง"),
-        SavedResponse(q: "สาขาวิชา", a: "วิศวกรรมระบบไอโอทีและสารสนเทศ"),
-    ]
     
-    @Binding var showAutofillView: Bool
+    var questions: [String]
+    
+    private var savedDatas: [SavedResponse] {
+        checkWithPersonalData()
+    }
+    
+    @Binding var isPresenting: Bool
     var body: some View {
         NavigationStack {
             VStack(spacing: 15) {
@@ -22,7 +23,7 @@ struct AutofillView: View {
                     .font(.title)
                     .fontWeight(.bold)
                 
-                ForEach(savedData, id: \.self) { data in
+                ForEach(savedDatas, id: \.self) { data in
                     
                     HStack {
                         VStack(alignment: .leading, spacing: -5) {
@@ -47,7 +48,7 @@ struct AutofillView: View {
                 Spacer()
                 Text("อนุญาตเพื่อกรอกโดยอัตโนมัติ")
                 Button("อนุญาต") {
-                    
+                    isPresenting = false
                 }
                 .buttonStyle(NextButtonStyle())
             }
@@ -56,13 +57,26 @@ struct AutofillView: View {
             .background(lightCream.opacity(0.25))
         }
     }
+    
+    private func checkWithPersonalData() -> [SavedResponse] {
+        var matchedDatas: [SavedResponse] = []
+        for question in questions {
+            if let matchedData = personalData.first(where: { $0.q == question}) {
+                matchedDatas.append(matchedData)
+            }
+        }
+        return matchedDatas
+    }
 }
 
 #Preview {
     struct Preview: View {
         @State private var showAutofillView: Bool = true
+        @State private var canbeAutofilledData: [String] = [
+            "ชื่อ สกุล", "อายุ", "เพศ", "สาขาวิชา"
+        ]
         var body: some View {
-            AutofillView(showAutofillView: $showAutofillView)
+            AutofillView(questions: canbeAutofilledData, isPresenting: $showAutofillView)
         }
     }
 

@@ -63,6 +63,7 @@ var testQuestions: [Question] {
 var personalData: [SavedResponse] {
     [
         SavedResponse(q: "อีเมล", a: "65010490@kmitl.ac.th"),
+        SavedResponse(q: "อายุ", a: "100"),
         SavedResponse(q: "ชื่อ สกุล", a: "สมชาย ใจดี"),
         SavedResponse(q: "มหาลัย", a: "สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง"),
         SavedResponse(q: "สาขาวิชา", a: "วิศวกรรมระบบไอโอทีและสารสนเทศ"),
