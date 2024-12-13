@@ -9,30 +9,40 @@ import SwiftUI
 
 struct AutofillView: View {
     
-    var questions: [String]
+    var questions: [Question]
     
     private var savedDatas: [SavedResponse] {
-        checkWithPersonalData()
+        var matchedDatas: [SavedResponse] = []
+        for question in questions {
+            if let matchedData = personalData.first(where: { $0.q == question.title}) {
+                matchedDatas.append(matchedData)
+            }
+        }
+        return matchedDatas
     }
     
+    @State private var responses: [UUID: Response] = [:]
+    
+    @Binding var userDatas: UserData
     @Binding var isPresenting: Bool
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 15) {
                 Text("คุณเคยกรอกข้อมูลดังนี้แล้ว")
-                    .font(.title)
+                    .font(.Ktitle)
                     .fontWeight(.bold)
+                    .padding(.vertical)
                 
                 ForEach(savedDatas, id: \.self) { data in
                     
                     HStack {
                         VStack(alignment: .leading, spacing: -5) {
                             Text(data.q)
-                                .font(.title2)
                                 .foregroundStyle(.white.opacity(0.5))
                             Spacer()
                             Text(data.a)
-                                .font(.title2)
+                                .font(.Ktitle2)
                                 .foregroundStyle(.white)
                         }
                         Spacer()
@@ -47,36 +57,57 @@ struct AutofillView: View {
                 }
                 Spacer()
                 Text("อนุญาตเพื่อกรอกโดยอัตโนมัติ")
+                    .padding()
+                    .foregroundStyle(.gray)
                 Button("อนุญาต") {
-                    isPresenting = false
+                    allow()
+                    isPresenting = false // back to the form page
                 }
                 .buttonStyle(NextButtonStyle())
             }
             .padding()
+            .font(.K)
             .frame(width: .infinity, height: .infinity)
             .background(lightCream.opacity(0.25))
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("ยกเลิก") {
+                        isPresenting = false
+                    }
+                }
+                
+            }
         }
     }
     
-    private func checkWithPersonalData() -> [SavedResponse] {
-        var matchedDatas: [SavedResponse] = []
+    private func allow() {
+        // Process all responses
         for question in questions {
-            if let matchedData = personalData.first(where: { $0.q == question}) {
-                matchedDatas.append(matchedData)
+            if let response = Response(id: question.id, answer: savedDatas.first(where: { $0.q == question.title })).answer {
+                print("\(question.title): \(response)")
+                userDatas.responses.append(Response(id: question.id, answer: response))
+            } else {
+                print("\(question.title): No response")
+                userDatas.responses.append(Response(id: question.id, answer: "-"))
             }
         }
-        return matchedDatas
+        print(userDatas)
     }
 }
 
 #Preview {
     struct Preview: View {
         @State private var showAutofillView: Bool = true
-        @State private var canbeAutofilledData: [String] = [
-            "ชื่อ สกุล", "อายุ", "เพศ", "สาขาวิชา"
+        private var canbeAutofilledData: [Question] = [
+            Question(title: "อาชีพ", type: .text),
+            Question(title: "ทีี่อยู่", type: .text),
+            Question(title: "เบอร์โทร", type: .text),
+            Question(title: "Facebook", type: .text),
         ]
+        @State private var userDatas: UserData = UserData(stuid: "")
         var body: some View {
-            AutofillView(questions: canbeAutofilledData, isPresenting: $showAutofillView)
+            AutofillView(questions: canbeAutofilledData, userDatas: $userDatas, isPresenting: $showAutofillView)
+                .font(.K)
         }
     }
 

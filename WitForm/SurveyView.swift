@@ -8,12 +8,16 @@
 import SwiftUI
 
 struct SurveyView: View {
+    private var surveyForm: SurveyForm {
+        testSurvey2
+    }
+    
     var body: some View {
         NavigationStack {
             VStack {
                 VStack(alignment: .leading) {
-                    Text("ต้องการผู้เข้าร่วมการชิมไวน์ พร้อมทำความพึงพอใจต่อรสชาติ")
-                        .font(.title)
+                    Text(surveyForm.title)
+                        .font(.KlargeTitle)
                         .padding(30)
                     Spacer()
                     HStack(spacing: 0) {
@@ -27,8 +31,8 @@ struct SurveyView: View {
                         .foregroundStyle(darkCream)
                         .background(lightCream)
                         
-                        Button {
-                            
+                        NavigationLink {
+                            FormView()
                         } label: {
                             Text("ทำเลย")
                         }
@@ -53,6 +57,7 @@ struct SurveyView: View {
                     Image(systemName: "plus")
                 }
             }
+            .font(.K)
         }
     }
 }

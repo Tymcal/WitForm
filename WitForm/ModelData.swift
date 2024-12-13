@@ -49,15 +49,38 @@ var testUser: User {
     User(stuid: "65010490", firstName: "Teema", lastName: "Khawjit")
 }
 
-var testQuestions: [Question] {
-    [
-        Question(title: "ชื่อ สกุล", type: .text),
-        Question(title: "อีเมล", type: .text),
-        Question(title: "เพศ", type: .text),
-        Question(title: "สาขาวิชา", type: .text),
-        Question(title: "Agree to terms?", type: .toggle),
-        Question(title: "Select your preference", type: .picker, options: ["Option 1", "Option 2", "Option 3"])
-    ]
+struct SurveyForm: Identifiable {
+    var id = UUID()
+    var title: String
+    var questions: [Question]
+    var owner: String
+}
+
+var testSurvey: SurveyForm {
+    SurveyForm(title: "แบบสำรวจ\nความพึงพอใจ\nต่อแอปธนาคารต่างๆ",
+               questions: [
+                Question(title: "ชื่อ สกุล", type: .text),
+                Question(title: "อีเมล", type: .text),
+                Question(title: "เพศ", type: .text),
+                Question(title: "สาขาวิชา", type: .text),
+                Question(title: "Agree to terms?", type: .toggle),
+                Question(title: "Select your preference", type: .picker, options: ["Option 1", "Option 2", "Option 3"])
+               ],
+               owner: testUser.stuid)
+}
+var testSurvey2: SurveyForm {
+    SurveyForm(title: "แบบสำรวจ\nความพึงพอใจ\nต่อการใช้ตู้คาเฟ่อัตโนมัติ\nเต่าบิน",
+               questions: [
+                Question(title: "อาชีพ", type: .text),
+                Question(title: "ทีี่อยู่", type: .text),
+                Question(title: "เบอร์โทร", type: .text),
+                Question(title: "Facebook", type: .text),
+                Question(title: "Instagram", type: .text),
+                Question(title: "LinkedIn", type: .text),
+                Question(title: "ชอบเพลงไหน", type: .toggle),
+                Question(title: "แอปซื้อของที่ชอบ", type: .picker, options: ["Shopee", "Lazada", "TikTok Shop"])
+            ],
+               owner: testUser.stuid)
 }
 
 var personalData: [SavedResponse] {

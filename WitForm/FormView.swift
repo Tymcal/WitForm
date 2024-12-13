@@ -8,22 +8,48 @@
 import SwiftUI
 
 struct FormView: View {
-    private var questions: [Question] {
-        testQuestions
-    }
-    
-    @State private var responses: [UUID: Response] = [:]
     
     private var user: User {
         testUser
     }
     
-    @State private var userDatas: UserData = UserData(stuid: "")
+    private var surveyForm: SurveyForm {
+        testSurvey
+    }
+    private var questions: [Question] {
+        surveyForm.questions
+    }
+    
     @State private var savedData: [SavedResponse] = personalData
     
     private var matchedData: [String] {
-        checkAutofill()
+        var canbeAutofilledData: [String] = []
+        for question in questions {
+            if let ques = savedData.first(where: { $0.q == question.title }) {
+                canbeAutofilledData.append(ques.q)
+            }
+        }
+//        print(canbeAutofilledData)
+        return canbeAutofilledData
     }
+    
+    private var manualQuestions: [Question] {
+        let matchedSet = Set(matchedData)
+        return questions.filter { question in
+            !matchedSet.contains(question.title)
+        }
+    }
+    
+    private var autoQuestions: [Question] {
+        let matchedSet = Set(matchedData)
+        return questions.filter { question in
+            matchedSet.contains(question.title)
+        }
+    }
+    
+    @State private var responses: [UUID: Response] = [:]
+    
+    @State private var userDatas: UserData = UserData(stuid: "")
     
     @State private var isPresenting: Bool = false
     
@@ -31,7 +57,7 @@ struct FormView: View {
         NavigationStack {
             VStack {
                 ScrollView {
-                    ForEach(questions) { question in
+                    ForEach(manualQuestions) { question in
                         VStack(alignment: .leading) {
                             Text(question.title)
                             switch question.type {
@@ -44,7 +70,7 @@ struct FormView: View {
                                         responses[question.id] = Response(id: question.id, answer: newValue)
                                     }
                                 ))
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .textFieldStyle(AnsTextFieldStyle())
                                 
                             case .toggle:
                                 Toggle(isOn: Binding(
@@ -70,6 +96,7 @@ struct FormView: View {
                                     )) {
                                         ForEach(options, id: \.self) { option in
                                             Text(option)
+                                                .font(.K)
                                         }
                                     }
                                     .pickerStyle(SegmentedPickerStyle())
@@ -86,11 +113,11 @@ struct FormView: View {
                 .buttonStyle(NextButtonStyle())
                 .padding()
             }
-            .navigationTitle("Dynamic Form")
+            .navigationTitle(surveyForm.title.replacingOccurrences(of: "\n", with: ""))
             .frame(width: .infinity, height: .infinity)
             .background(lightCream.opacity(0.25))
             .fullScreenCover(isPresented: $isPresenting, onDismiss: onDismiss) {
-                AutofillView(questions: matchedData, isPresenting: $isPresenting)
+                AutofillView(questions: autoQuestions, userDatas: $userDatas, isPresenting: $isPresenting)
             }
             .onAppear {
                 if matchedData != [] {
@@ -98,17 +125,6 @@ struct FormView: View {
                 }
             }
         }
-    }
-    
-    private func checkAutofill() -> [String] {
-        var canbeAutofilledData: [String] = []
-        for question in questions {
-            if let ques = savedData.first(where: { $0.q == question.title }) {
-                canbeAutofilledData.append(ques.q)
-            }
-        }
-//        print(canbeAutofilledData)
-        return canbeAutofilledData
     }
     
     func onDismiss() {
@@ -135,6 +151,22 @@ struct FormView: View {
     }
 }
 
+struct AnsTextFieldStyle: TextFieldStyle {
+    func _body(configuration: TextField<Self._Label>) -> some View {
+        configuration
+            .padding(.bottom, 5)
+            .fontWeight(.light)
+            .overlay(
+                    Rectangle()
+                        .frame(height: 2)
+                        .foregroundColor(blue),
+                    alignment: .bottom
+                )
+//            .frame(height: 50)
+    }
+}
+
 #Preview {
     FormView()
+        .font(.K)
 }
